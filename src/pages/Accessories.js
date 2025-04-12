@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import StarIcon from '@mui/icons-material/Star';
+
 import {
   Container,
   Typography,
@@ -194,9 +196,11 @@ export default function Accessories() {
                   <Typography variant="body2" color="text.secondary">
                     {a.type}
                   </Typography>
-                  <Typography variant="body2" sx={{ mt: 1 }}>
-                    ${a.value}
+                  <Typography variant="body2" sx={{ mt: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  {a.value}
+                    <StarIcon fontSize="small" sx={{ color: "#FFD700" }} />
                   </Typography>
+
                 </CardContent>
                 <CardActions>
                   <Button size="small" onClick={() => handleOpenDialog(a)}>
