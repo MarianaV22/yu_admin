@@ -36,7 +36,7 @@ export default function Users() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const token = getCookie('token'); // Lê o token dos cookies
+        const token = getCookie('token'); 
         const response = await axios.get("http://localhost:3000/users", {
           headers: {
             Authorization: `Bearer ${token}`,

@@ -24,6 +24,15 @@ import {
   Grow,
 } from '@mui/material';
 
+const accessoryTypes = [
+  "Backgrounds",
+  "Shirts",
+  "SkinColor",
+  "Bigode",
+  "Cachecol",
+  "Chapeu",
+  "Ouvidos"
+];
 export default function Accessories() {
   const [accessories, setAccessories] = useState([]);
   const [open, setOpen] = useState(false);
@@ -37,10 +46,9 @@ export default function Accessories() {
   const [filterType, setFilterType] = useState('All');
   const [checked, setChecked] = useState(false);
 
-  // Ao montar o componente, tenta buscar os acessórios da API
   useEffect(() => {
     axios
-      .get('http://localhost:3000/accessories') // Ajuste a URL conforme seu endpoint
+      .get('http://localhost:3000/accessories') 
       .then((res) => {
         if (res.data && Array.isArray(res.data.accessories)) {
           setAccessories(res.data.accessories);
@@ -57,7 +65,7 @@ export default function Accessories() {
     setChecked(true);
   }, []);
 
-  // Filtro: exibe acessórios conforme o tipo selecionado
+
   const filteredAccessories = accessories.filter((a) =>
     filterType === 'All' ? true : a.type === filterType
   );
@@ -138,10 +146,15 @@ export default function Accessories() {
             label="Filter by Type"
           >
             <MenuItem value="All">All</MenuItem>
-            <MenuItem value="Decor">Decor</MenuItem>
-            <MenuItem value="SkinColor">SkinColor</MenuItem>
-            <MenuItem value="Shirts">Shirts</MenuItem>
             <MenuItem value="Backgrounds">Backgrounds</MenuItem>
+            <MenuItem value="Shirts">Shirts</MenuItem>
+            <MenuItem value="SkinColor">SkinColor</MenuItem>
+            <MenuItem value="Bigode">Bigode</MenuItem>
+            <MenuItem value="Cachecol">Cachecol</MenuItem>
+            <MenuItem value="Chapeu">Chapeu</MenuItem>
+            <MenuItem value="Ouvidos">Ouvidos</MenuItem>
+
+
           </Select>
         </FormControl>
         <Button
@@ -222,6 +235,28 @@ export default function Accessories() {
           {currentAccessory ? 'Edit Accessory' : 'Add Accessory'}
         </DialogTitle>
         <DialogContent>
+          {/* Preview da imagem */}
+          {form.src && (
+            <Box
+              component="div"
+              sx={{
+                mt: 2,
+                textAlign: 'center'
+              }}
+              >
+              <img
+                src={form.src}
+                alt={form.name || 'Preview'}
+                style={{
+                  maxWidth: '100%',
+                  maxHeight: 200,
+                  borderRadius: 4,
+                  boxShadow: '0 0 4px rgba(0,0,0,0.2)'
+                }}
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              />
+            </Box>
+          )}
           <TextField
             autoFocus
             margin="dense"
@@ -230,14 +265,22 @@ export default function Accessories() {
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
           />
-          <TextField
-            margin="dense"
-            label="Type"
-            fullWidth
-            value={form.type}
-            onChange={(e) => setForm({ ...form, type: e.target.value })}
-            helperText="Use values: Decor, SkinColor, Shirts, Backgrounds"
-          />
+
+          <FormControl fullWidth margin="dense">
+            <InputLabel id="type-select-label">Type</InputLabel>
+            <Select
+              labelId="type-select-label"
+              value={form.type}
+              label="Type"
+              onChange={(e) => setForm({ ...form, type: e.target.value })}
+            >
+              {accessoryTypes.map((t) => (
+                <MenuItem key={t} value={t}>{t}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+ 
+
           <TextField
             margin="dense"
             label="Value"
@@ -253,6 +296,8 @@ export default function Accessories() {
             value={form.src}
             onChange={(e) => setForm({ ...form, src: e.target.value })}
           />
+
+  
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog}>Cancel</Button>
