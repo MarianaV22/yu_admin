@@ -13,7 +13,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import EmailIcon from '@mui/icons-material/Email';
 
-// Função auxiliar para ler o token dos cookies
+
 function getCookie(name) {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
@@ -26,7 +26,6 @@ export default function Dashboard() {
   const [totalUsers, setTotalUsers] = useState(0);
   const [totalAccessories, setTotalAccessories] = useState(0);
 
-  // Buscar total de usuários
   useEffect(() => {
     const fetchUserStats = async () => {
       try {
@@ -46,7 +45,7 @@ export default function Dashboard() {
     fetchUserStats();
   }, []);
 
-  // Buscar total de acessórios
+
   useEffect(() => {
     const fetchAccessoryStats = async () => {
       try {
@@ -66,7 +65,7 @@ export default function Dashboard() {
     fetchAccessoryStats();
   }, []);
 
-  // Define os dados para os cards, usando os valores reais onde aplicável.
+
   const stats = [
     {
       title: 'Acessórios',

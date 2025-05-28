@@ -15,10 +15,14 @@ import {
   Button,
 } from '@mui/material';
 
-// Ícones do Material UI (exemplos)
+
 import DashboardIcon from '@mui/icons-material/Assessment';
 import PersonIcon from '@mui/icons-material/Person';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import MessageIcon from '@mui/icons-material/Message';
+
+
 
 const drawerWidth = 240;
 
@@ -173,7 +177,7 @@ export default function AdminLayout() {
             {/* TASK */}
             <ListItemButton
             component={Link}
-            to="/"
+            to="/tasks"
             selected={pathname === '/task'}
             sx={{
               borderRadius: 2,
@@ -189,13 +193,41 @@ export default function AdminLayout() {
             }}
           >
             <ListItemIcon sx={{ color: '#8E5DB1' }}>
-              <ShoppingBagIcon />
+              <AssignmentIcon />
             </ListItemIcon>
             <ListItemText
               primary="Tasks"
               primaryTypographyProps={{ fontWeight: 'medium' }}
             />
           </ListItemButton>
+
+            {/* PresetMessages */}
+            <ListItemButton
+            component={Link}
+            to="/preset_messages"
+            selected={pathname === '/preset_messages'}
+            sx={{
+              borderRadius: 2,
+              mx: 1,
+              my: 0.5,
+              '&.Mui-selected': {
+                bgcolor: 'action.selected',
+                color: '#8E5DB1',
+                '& .MuiListItemIcon-root': {
+                  color: '#8E5DB1',
+                },
+              },
+            }}
+          >
+            <ListItemIcon sx={{ color: '#8E5DB1' }}>
+              <MessageIcon />
+            </ListItemIcon>
+            <ListItemText
+              primary="preset_messages"
+              primaryTypographyProps={{ fontWeight: 'medium' }}
+            />
+          </ListItemButton>
+
         </List>
       </Drawer>
 
