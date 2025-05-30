@@ -1,23 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { 
-  Typography, 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableRow, 
-  Button, 
-  Dialog, 
-  DialogTitle, 
-  DialogContent, 
-  DialogActions, 
-  TextField 
+import api from '../utils/api';
+import Avatar from '../components/Avatar';
+import './Users.css';
+import {
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Box,
+  Snackbar,
+  Alert,
+  IconButton,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-// Função auxiliar para ler um cookie pelo nome
+// Helper para ler cookie
 function getCookie(name) {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
@@ -27,47 +37,28 @@ function getCookie(name) {
 
 export default function Users() {
   const [users, setUsers] = useState([]);
+  const [accessoriesList, setAccessoriesList] = useState([]);
   const [open, setOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-  // Agora os dados do formulário usam "username" em vez de "name"
   const [form, setForm] = useState({ username: '', code: '', email: '', points: 0 });
+  const [alert, setAlert] = useState({ open: false, message: '', severity: 'success' });
 
-  // Função para buscar os usuários da API
+  // Fetch users e accessories
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const token = getCookie('token'); 
-        const response = await axios.get("http://localhost:3000/users", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        // Se a API retornar um array ou um objeto com a chave "users"
-        if (Array.isArray(response.data)) {
-          setUsers(response.data);
-        } else if (response.data && Array.isArray(response.data.users)) {
-          setUsers(response.data.users);
-        } else {
-          console.error("Formato inesperado da resposta:", response.data);
-          setUsers([]);
-        }
-      } catch (error) {
-        console.error("Erro ao buscar usuários:", error);
-      }
-    };
+    const token = getCookie('token');
+    api.get('/users', { headers: { Authorization: `Bearer ${token}` } })
+      .then(res => setUsers(res.data.users || res.data))
+      .catch(err => console.error('Erro ao buscar usuários:', err));
 
-    fetchUsers();
+    api.get('/accessories', { headers: { Authorization: `Bearer ${token}` } })
+      .then(res => setAccessoriesList(res.data.accessories))
+      .catch(err => console.error('Erro ao buscar acessórios:', err));
   }, []);
 
   const handleOpenDialog = (user) => {
     if (user) {
       setCurrentUser(user);
-      setForm({ 
-        username: user.username, 
-        code: user.code, 
-        email: user.email, 
-        points: user.points 
-      });
+      setForm({ username: user.username, code: user.code, email: user.email, points: user.points });
     } else {
       setCurrentUser(null);
       setForm({ username: '', code: '', email: '', points: 0 });
@@ -77,80 +68,48 @@ export default function Users() {
 
   const handleCloseDialog = () => setOpen(false);
 
-  // Se estiver editando, usa PUT; se for criação, usa POST (exemplo)
   const handleSave = async () => {
     const token = getCookie('token');
     try {
+      let res;
       if (currentUser) {
-        // Atualização (PUT)
-        const response = await axios.put(
-          `http://localhost:3000/users/${currentUser._id}`,
-          form,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        // Atualiza o estado com os dados atualizados (pode usar response.data se a API retornar o objeto atualizado)
-        setUsers(users.map(u => u._id === currentUser._id ? response.data : u));
+        res = await api.put(`/users/${currentUser._id}`, form, { headers: { Authorization: `Bearer ${token}` } });
+        setUsers(users.map(u => u._id === currentUser._id ? res.data : u));
+        setAlert({ open: true, message: 'Utilizador atualizado com sucesso!', severity: 'success' });
       } else {
-        // Criação (POST) – se necessário. Exemplo:
-        const response = await axios.post(
-          `http://localhost:3000/users`,
-          form,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        // Adiciona o novo usuário ao estado
-        setUsers([...users, response.data]);
+        res = await api.post('/users', form, { headers: { Authorization: `Bearer ${token}` } });
+        setUsers([...users, res.data]);
+        setAlert({ open: true, message: 'Utilizador criado com sucesso!', severity: 'success' });
       }
       setOpen(false);
     } catch (error) {
-      console.error("Erro ao salvar usuário:", error);
+      console.error('Erro ao salvar usuário:', error);
+      setAlert({ open: true, message: 'Erro ao salvar usuário.', severity: 'error' });
     }
   };
 
   const handleDelete = async (id) => {
     const token = getCookie('token');
     try {
-      await axios.delete(`http://localhost:3000/users/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      // Atualiza o estado removendo o usuário deletado
+      await api.delete(`/users/${id}`, { headers: { Authorization: `Bearer ${token}` } });
       setUsers(users.filter(u => u._id !== id));
+      setAlert({ open: true, message: 'Utilizador eliminado com sucesso!', severity: 'success' });
     } catch (error) {
-      console.error("Erro ao deletar usuário:", error);
+      console.error('Erro ao deletar usuário:', error);
+      setAlert({ open: true, message: 'Erro ao eliminar utilizador.', severity: 'error' });
     }
   };
 
+  const handleAlertClose = () => setAlert({ ...alert, open: false });
+
   return (
-    <div>
-      <Typography variant="h4" gutterBottom>
-        Users
-      </Typography>
-      <Button 
-        variant="contained" 
-        onClick={() => handleOpenDialog()} 
-        sx={{
-          backgroundColor: '#8E5DB1', 
-          color: '#fff',
-          fontWeight: 'bold',
-          textTransform: 'uppercase',
-          px: 3,
-          py: 1.5,
-          borderRadius: 2,
-          boxShadow: 'none',
-          transition: 'background-color 0.3s, box-shadow 0.3s',
-          '&:hover': {
-            backgroundColor: '#634B7A', 
-            boxShadow: '0 3px 6px rgba(0,0,0,0.2)',
-          },
-        }}
-      >
+    <Box>
+      <Typography variant="h4" gutterBottom>Users</Typography>
+      <Button variant="contained" onClick={() => handleOpenDialog()} sx={{ mb: 2, backgroundColor: '#8E5DB1' }}>
         Add User
       </Button>
 
-      <Table sx={{ mt: 2 }}>
+      <Table>
         <TableHead>
           <TableRow>
             <TableCell>ID</TableCell>
@@ -171,56 +130,18 @@ export default function Users() {
               <TableCell>{u.email}</TableCell>
               <TableCell>{u.points}</TableCell>
               <TableCell>
-                <img 
-                  src={u.mascot} 
-                  alt={u.username} 
-                  style={{ width: 50, height: 50, borderRadius: '50%' }}
-                />
+                <div className="avatarWrapper">
+                  <Avatar
+                    mascot={u.mascot}
+                    equipped={u.accessoriesEquipped || {}}
+                    accessoriesList={accessoriesList}
+                    size={50}
+                  />
+                </div>
               </TableCell>
               <TableCell>
-                <Button
-                  onClick={() => handleOpenDialog(u)}
-                  variant="contained"
-                  startIcon={<EditIcon />}
-                  sx={{
-                    backgroundColor: '#8E5DB1',
-                    borderRadius: '20px',
-                    color: '#fff',
-                    fontSize: '16px',
-                    fontWeight: 'bold',
-                    textTransform: 'none',
-                    px: 2,
-                    py: 1,
-                    boxShadow: 'none',
-                    '&:hover': {
-                      backgroundColor: '#634B7A',
-                    },
-                  }}
-                >
-                  Edit
-                </Button>
-                <Button
-                  onClick={() => handleDelete(u._id)}
-                  variant="contained"
-                  startIcon={<DeleteIcon />}
-                  sx={{
-                    backgroundColor: '#8E5DB1',
-                    borderRadius: '20px',
-                    color: '#fff',
-                    fontSize: '16px',
-                    fontWeight: 'bold',
-                    textTransform: 'none',
-                    px: 2,
-                    py: 1,
-                    ml: 1,
-                    boxShadow: 'none',
-                    '&:hover': {
-                      backgroundColor: '#634B7A',
-                    },
-                  }}
-                >
-                  Delete
-                </Button>
+                <IconButton onClick={() => handleOpenDialog(u)}><EditIcon /></IconButton>
+                <IconButton color="error" onClick={() => handleDelete(u._id)}><DeleteIcon /></IconButton>
               </TableCell>
             </TableRow>
           ))}
@@ -230,42 +151,22 @@ export default function Users() {
       <Dialog open={open} onClose={handleCloseDialog}>
         <DialogTitle>{currentUser ? 'Edit User' : 'Add User'}</DialogTitle>
         <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Username"
-            fullWidth
-            value={form.username}
-            onChange={e => setForm({ ...form, username: e.target.value })}
-          />
-          <TextField
-            margin="dense"
-            label="Code"
-            fullWidth
-            value={form.code}
-            onChange={e => setForm({ ...form, code: e.target.value })}
-          />
-          <TextField
-            margin="dense"
-            label="Email"
-            fullWidth
-            value={form.email}
-            onChange={e => setForm({ ...form, email: e.target.value })}
-          />
-          <TextField
-            margin="dense"
-            label="Points"
-            type="number"
-            fullWidth
-            value={form.points}
-            onChange={e => setForm({ ...form, points: Number(e.target.value) })}
-          />
+          <TextField autoFocus margin="dense" label="Username" fullWidth value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} />
+          <TextField margin="dense" label="Code" fullWidth value={form.code} onChange={e => setForm({ ...form, code: e.target.value })} />
+          <TextField margin="dense" label="Email" fullWidth value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
+          <TextField margin="dense" label="Points" type="number" fullWidth value={form.points} onChange={e => setForm({ ...form, points: Number(e.target.value) })} />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog}>Cancel</Button>
           <Button onClick={handleSave}>Save</Button>
         </DialogActions>
       </Dialog>
-    </div>
+
+      <Snackbar open={alert.open} autoHideDuration={6000} onClose={handleAlertClose} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+        <Alert onClose={handleAlertClose} severity={alert.severity} sx={{ width: '100%' }}>
+          {alert.message}
+        </Alert>
+      </Snackbar>
+    </Box>
   );
 }
