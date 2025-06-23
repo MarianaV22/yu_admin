@@ -12,7 +12,7 @@ import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import PersonIcon from '@mui/icons-material/Person';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import EmailIcon from '@mui/icons-material/Email';
-
+import api from '../utils/api';
 
 function getCookie(name) {
   const value = `; ${document.cookie}`;
@@ -26,44 +26,19 @@ export default function Dashboard() {
   const [totalUsers, setTotalUsers] = useState(0);
   const [totalAccessories, setTotalAccessories] = useState(0);
 
-  useEffect(() => {
-    const fetchUserStats = async () => {
-      try {
-        const token = getCookie("token");
-        const response = await axios.get("http://localhost:3000/users/stats/users", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (response.data && typeof response.data.totalUsers !== "undefined") {
-          setTotalUsers(response.data.totalUsers);
-        } else {
-          console.error("Formato inesperado da resposta de users:", response.data);
-        }
-      } catch (error) {
-        console.error("Erro ao buscar total de usuários:", error);
-      }
-    };
-    fetchUserStats();
-  }, []);
-
 
   useEffect(() => {
-    const fetchAccessoryStats = async () => {
-      try {
-        const token = getCookie("token");
-        const response = await axios.get("http://localhost:3000/accessories/stats", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (response.data && typeof response.data.totalAccessories !== "undefined") {
-          setTotalAccessories(response.data.totalAccessories);
-        } else {
-          console.error("Formato inesperado da resposta de accessories:", response.data);
-        }
-      } catch (error) {
-        console.error("Erro ao buscar total de acessórios:", error);
-      }
-    };
-    fetchAccessoryStats();
+    const token = getCookie('token');
+    api.get('/users/stats/users', { headers: { Authorization: `Bearer ${token}` } })
+      .then(res => setTotalUsers(res.data.totalUsers))
+      .catch(err => console.error('Erro ao buscar users:', err));
+
+    api.get('/accessories/stats', { headers: { Authorization: `Bearer ${token}` } })
+      .then(res => setTotalAccessories(res.data.totalAccessories))
+      .catch(err => console.error('Erro ao buscar accessories:', err));
+
   }, []);
+
 
 
   const stats = [
@@ -79,18 +54,7 @@ export default function Dashboard() {
       icon: <PersonIcon fontSize="large" />,
       gradient: 'linear-gradient(135deg, rgb(231, 201, 236) 0%, #B653CA 100%)',
     },
-    {
-      title: 'Tarefas Concluídas com sucesso!',
-      value: '200',
-      icon: <ShoppingCartIcon fontSize="large" />,
-      gradient: 'linear-gradient(135deg, rgb(213, 247, 245) 0%, #8DD4D1 100%)',
-    },
-    {
-      title: 'Total Tarefas Propostas',
-      value: '500',
-      icon: <EmailIcon fontSize="large" />,
-      gradient: 'linear-gradient(135deg, rgb(216, 231, 192) 0%, #99C556 100%)',
-    },
+    
   ];
 
   return (

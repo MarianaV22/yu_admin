@@ -223,7 +223,7 @@ export default function AdminLayout() {
               <MessageIcon />
             </ListItemIcon>
             <ListItemText
-              primary="preset_messages"
+              primary="Preset Messages"
               primaryTypographyProps={{ fontWeight: 'medium' }}
             />
           </ListItemButton>
