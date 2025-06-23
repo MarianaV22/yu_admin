@@ -12,6 +12,7 @@ import Users from './pages/Users';
 import Accessories from './pages/Accessories';
 import Tasks from './pages/Tasks';
 import PresetMessages from './pages/PresetMessages';
+import Login from './pages/Login';
 import { setAuthToken, setAuthUser, getAuthToken } from './utils/storageUtils';
 import api from './utils/api';
 
