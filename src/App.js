@@ -55,7 +55,7 @@ function AppRoutes() {
             window.location.pathname
           );
           setCheckingAuth(false);
-          navigate('https://yu-mctw.vercel.app/login');
+          navigate('/');
         });
     } else {
       
