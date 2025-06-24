@@ -31,7 +31,22 @@ export default function AdminLayout() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-   
+   const iframe = document.createElement("iframe");
+    iframe.style.display = "none";
+    iframe.src = "https://yu-mctw.vercel.app/login/clear-ls.html";
+    document.body.appendChild(iframe);
+
+
+    iframe.onload = () => {
+      iframe.contentWindow?.postMessage(
+        { type: "CLEAR_LS" },
+        "https://yu-mctw.vercel.app/login"
+      );
+
+      setTimeout(() => {
+        window.location.replace("https://yu-mctw.vercel.app/login");
+      }, 100); // ~0,1 s é suficiente
+    };
   };
 
   return (

@@ -75,7 +75,6 @@ useEffect(() => {
     <Routes>
       {/* Opcional: ainda deixas rota interna de /login? */}
       <Route path="/login" element={<Login />} />
-
       <Route element={<AdminLayout />}>
         <Route path="/" element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
