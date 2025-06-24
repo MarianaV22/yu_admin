@@ -31,22 +31,7 @@ export default function AdminLayout() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-   const iframe = document.createElement("iframe");
-  iframe.style.display = "none";
-  iframe.src = "https://yu-mctw.vercel.app/login/clear-ls.html";
-  document.body.appendChild(iframe);
-
-  // (3) Quando o iframe carregar, envia a mensagem para limpar o LS da 3001
-  iframe.onload = () => {
-    iframe.contentWindow?.postMessage(
-      { type: "CLEAR_LS" },
-      "https://yu-mctw.vercel.app/login"
-    );
-    // (4) Depois de dar tempo ao iframe, redirecciona o utilizador
-    setTimeout(() => {
-      window.location.replace("https://yu-mctw.vercel.app/login");
-    }, 100); // ~0,1 s é suficiente
-  };
+   
   };
 
   return (
