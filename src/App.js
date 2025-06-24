@@ -28,12 +28,6 @@ function AppRoutes() {
     const tokenFromUrl = params.get('token');
     const token = tokenFromUrl || getAuthToken();
 
-    if (!token) {
-      setCheckingAuth(false);
-      // leva à página externa de login
-      window.location.href = EXTERNAL_LOGIN;
-      return;
-    }
 
     setAuthToken(token);
     api.get('/users/me')
