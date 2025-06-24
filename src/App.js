@@ -26,27 +26,61 @@ function AppRoutes() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const tokenFromUrl = params.get('token');
-    const token = tokenFromUrl || getAuthToken();
 
+    if (tokenFromUrl) {
+    
+      setAuthToken(tokenFromUrl);
 
-    setAuthToken(token);
-    api.get('/users/me')
-      .then(res => {
-        setAuthUser(res.data);
-        setIsAuth(true);
-      })
-      .catch(() => {
-        setAuthToken('');
-        setIsAuth(false);
-        window.location.href = EXTERNAL_LOGIN;
-      })
-      .finally(() => {
-        if (tokenFromUrl) {
-          window.history.replaceState({}, document.title, window.location.pathname);
-        }
+   
+      api.get('/users/me')
+        .then((res) => {
+          setAuthUser(res.data);
+        
+          window.history.replaceState(
+            {},
+            document.title,
+            window.location.pathname
+          );
+          setCheckingAuth(false);
+       
+          navigate('/dashboard');
+        })
+        .catch((err) => {
+          console.error('Token inválido ou erro ao procurar utilizador:', err);
+         
+          setAuthToken('');
+          window.history.replaceState(
+            {},
+            document.title,
+            window.location.pathname
+          );
+          setCheckingAuth(false);
+          navigate('https://yu-mctw.vercel.app/login');
+        });
+    } else {
+      
+      const token = getAuthToken();
+      if (!token) {
         setCheckingAuth(false);
-      });
-  }, [navigate]);
+        navigate('https://yu-mctw.vercel.app/login');
+      } else {
+      
+        api
+          .get('/users/me')
+          .then((res) => {
+            setAuthUser(res.data);
+            setCheckingAuth(false);
+         
+          })
+          .catch((err) => {
+            console.error('Token expirado ou inválido:', err);
+            setAuthToken('');
+            setCheckingAuth(false);
+            navigate('https://yu-mctw.vercel.app/login');
+          });
+      }
+    }
+  }, []);
 
   if (checkingAuth) return null;
 
