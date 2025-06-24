@@ -12,7 +12,7 @@ import Users from './pages/Users';
 import Accessories from './pages/Accessories';
 import Tasks from './pages/Tasks';
 import PresetMessages from './pages/PresetMessages';
-import Login from './pages/Login'; // podes manter este se ainda quiseres pagina interna
+import Login from './pages/Login'; 
 import { setAuthToken, setAuthUser, getAuthToken } from './utils/storageUtils';
 import api from './utils/api';
 
@@ -23,64 +23,51 @@ function AppRoutes() {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [isAuth, setIsAuth] = useState(false);
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const tokenFromUrl = params.get('token');
+useEffect(() => {
 
-    if (tokenFromUrl) {
-    
-      setAuthToken(tokenFromUrl);
+  async function bootstrap() {
+    const params = new URLSearchParams(window.location.search);
+    const tokenFromUrl = params.get("token");
+
+    try {
+
+      if (tokenFromUrl) {
+        setAuthToken(tokenFromUrl);
+
+        const { data: user } = await api.get("/users/me");
+        setAuthUser(user);
 
    
-      api.get('/users/me')
-        .then((res) => {
-          setAuthUser(res.data);
-        
-          window.history.replaceState(
-            {},
-            document.title,
-            window.location.pathname
-          );
-          setCheckingAuth(false);
-       
-          navigate('/dashboard');
-        })
-        .catch((err) => {
-          console.error('Token inválido ou erro ao procurar utilizador:', err);
-         
-          setAuthToken('');
-          window.history.replaceState(
-            {},
-            document.title,
-            window.location.pathname
-          );
-          setCheckingAuth(false);
-          navigate('/');
-        });
-    } else {
-      
-      const token = getAuthToken();
-      if (!token) {
+        window.history.replaceState({}, "", "/dashboard");
+
+        setIsAuth(true);
         setCheckingAuth(false);
-        navigate('https://yu-mctw.vercel.app/login');
-      } else {
-      
-        api
-          .get('/users/me')
-          .then((res) => {
-            setAuthUser(res.data);
-            setCheckingAuth(false);
-         
-          })
-          .catch((err) => {
-            console.error('Token expirado ou inválido:', err);
-            setAuthToken('');
-            setCheckingAuth(false);
-            navigate('https://yu-mctw.vercel.app/login');
-          });
+        navigate("/dashboard", { replace: true });
+        return;
       }
+
+
+      const storedToken = getAuthToken();
+      if (!storedToken) {
+
+        window.location.replace(EXTERNAL_LOGIN);
+        return;
+      }
+
+      const { data: user } = await api.get("/users/me");
+      setAuthUser(user);
+
+      setIsAuth(true);
+      setCheckingAuth(false);
+    } catch (err) {
+      console.error("Token inválido ou expirado:", err);
+      clearAuthStorage();
+      window.location.replace(EXTERNAL_LOGIN);
     }
-  }, []);
+  }
+
+  bootstrap();
+}, [navigate]);
 
   if (checkingAuth) return null;
 
